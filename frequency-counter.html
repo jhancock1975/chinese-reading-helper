@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>繁體中文詞頻統計 (不計停用詞)</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    textarea {
+      width: 100%;
+      height: 200px;
+      margin-bottom: 10px;
+    }
+    #result {
+      margin-top: 20px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      background: #f9f9f9;
+    }
+  </style>
+</head>
+<body>
+  <h2>請在下面貼上繁體中文文字：</h2>
+  <textarea id="inputText" placeholder="在此貼上繁體中文文本..."></textarea>
+  <br>
+  <button onclick="processText()">找出最常出現的五個詞（不含停用詞）</button>
+  
+  <div id="result"></div>
+
+  <script>
+    // Define a list of common Traditional Chinese stop words.
+    // You can modify or expand this list as needed.
+    const stopWords = ["的", "了", "在", "是", "和", "也", "我", "有", "不", "就", "人", "都", "而", "及", "與", "而且", "但", "或", "如果"];
+    
+    function processText() {
+      const text = document.getElementById("inputText").value;
+      // 使用正則表達式抓取所有連續的中文字符
+      const words = text.match(/[\u4e00-\u9fa5]+/g);
+      
+      if (!words) {
+        document.getElementById("result").innerHTML = "<p>未找到中文詞彙，請檢查輸入。</p>";
+        return;
+      }
+      
+      // 先將所有詞過濾掉停用詞
+      const filteredWords = words.filter(word => !stopWords.includes(word));
+      
+      // 統計每個非停用詞出現的次數
+      const freq = {};
+      filteredWords.forEach(word => {
+        if (freq[word]) {
+          freq[word]++;
+        } else {
+          freq[word] = 1;
+        }
+      });
+      
+      // 將統計結果轉換成 [詞語, 次數] 的陣列
+      const freqArray = Object.entries(freq);
+      
+      // 按次數降序排序
+      freqArray.sort((a, b) => b[1] - a[1]);
+      
+      // 取出最常出現的五個詞
+      const topFive = freqArray.slice(0, 5);
+      
+      // 生成輸出內容
+      let outputHtml = "<h3>最常出現的五個詞（不含停用詞）：</h3>";
+      if (topFive.length === 0) {
+        outputHtml += "<p>沒有足夠的詞彙來統計，或全部都是停用詞。</p>";
+      } else {
+        outputHtml += "<ol>";
+        topFive.forEach(item => {
+          outputHtml += `<li>${item[0]} : ${item[1]} 次</li>`;
+        });
+        outputHtml += "</ol>";
+      }
+      
+      document.getElementById("result").innerHTML = outputHtml;
+    }
+  </script>
+</body>
+</html>
